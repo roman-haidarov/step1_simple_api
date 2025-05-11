@@ -1,5 +1,5 @@
 package types
 
 type Body struct {
-	Task float64 `json:"task"`
+	Task string `json:"task" validate:"required,min=1"`
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"step1_simple_api/internal/types"
 	"sync"
@@ -10,11 +11,11 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-var Taks float64
-
 type API struct {
 	router *chi.Mux
 }
+
+var Task string
 
 func New() *API {
 	api := &API{router: chi.NewRouter()}
@@ -25,8 +26,8 @@ func New() *API {
 
 func (api *API) Serve() error {
 	srv := &http.Server{
-		Addr:    			":8080",
-		Handler: 			api.router,
+		Addr:         ":8080",
+		Handler:      api.router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
@@ -35,15 +36,18 @@ func (api *API) Serve() error {
 }
 
 func (api *API) registerEndpoints() {
-	api.router.Get("/api/v1/calculates", api.lastResult)
-	api.router.Post("/api/v1/calculates", api.operation)
+	api.router.Get("/api/v1/tasks", api.getTask)
+	api.router.Post("/api/v1/tasks", api.createTask)
 }
 
-func (api *API) lastResult(w http.ResponseWriter, r *http.Request) {
-	api.WriteJSON(w, r, Taks)
+func (api *API) getTask(w http.ResponseWriter, r *http.Request) {
+	mess := map[string]string{}
+	mess["message"] = fmt.Sprintf("Hello, %v", Task)
+
+	api.WriteJSON(w, r, mess)
 }
 
-func (api *API) operation(w http.ResponseWriter, r *http.Request) {
+func (api *API) createTask(w http.ResponseWriter, r *http.Request) {
 	var req types.Body
 	_ = json.NewDecoder(r.Body).Decode(&req)
 
@@ -51,5 +55,6 @@ func (api *API) operation(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	Taks = req.Task
+	Task = fmt.Sprintf("%v", req.Task)
+	w.WriteHeader(http.StatusCreated)
 }
