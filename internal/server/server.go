@@ -1,16 +1,30 @@
 package server
 
-import "step1_simple_api/internal/api"
+import (
+	"step1_simple_api/internal/api"
+	"step1_simple_api/internal/db"
+	"step1_simple_api/internal/tasks"
+)
 
 type Server struct {
-	api *api.API
+	db    db.DB
+	api   *api.API
+	tasks *tasks.Service
 }
 
 func New() (*Server, error) {
-	s := &Server{}
-	s.api = api.New()
+	s := Server{}
+	db, err := db.InitDB()
 
-	return s, nil
+	if err != nil {
+		return nil, err
+	}
+
+	s.db = *db
+	s.tasks = tasks.New(s.db)
+	s.api = api.New(s.tasks)
+
+	return &s, nil
 }
 
 func (s *Server) Run() error {

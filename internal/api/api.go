@@ -3,8 +3,8 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"step1_simple_api/internal/tasks"
 	"step1_simple_api/internal/types"
-	"sync"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -13,14 +13,13 @@ import (
 
 type API struct {
 	router *chi.Mux
-	mu     sync.Mutex
-	tasks  map[string]types.Task
+	tasks  *tasks.Service
 }
 
-func New() *API {
+func New(tasks *tasks.Service) *API {
 	api := &API{
 		router: chi.NewRouter(),
-		tasks:  make(map[string]types.Task),
+		tasks:  tasks,
 	}
 	api.registerEndpoints()
 
@@ -47,28 +46,26 @@ func (api *API) registerEndpoints() {
 }
 
 func (api *API) getTasks(w http.ResponseWriter, r *http.Request) {
-	api.mu.Lock()
-	tasks := make([]types.Task, 0, len(api.tasks))
-	for _, task := range api.tasks {
-		tasks = append(tasks, task)
+	tasks, err := api.tasks.GetTasks()
+
+	if err != nil {
+		api.WriteError(w, r, "Internal server error", http.StatusInternalServerError)
+		return
 	}
-	api.mu.Unlock()
 
 	api.WriteJSON(w, r, tasks, http.StatusOK)
 }
 
 func (api *API) getTask(w http.ResponseWriter, r *http.Request) {
 	uuid := chi.URLParam(r, "uuid")
+	task, err := api.tasks.GetTask(uuid)
 
-	api.mu.Lock()
-	task, exists := api.tasks[uuid]
-	api.mu.Unlock()
-
-	if exists {
-		api.WriteJSON(w, r, task, http.StatusOK)
-	} else {
+	if err != nil {
 		api.WriteError(w, r, "Task not found", http.StatusNotFound)
+		return
 	}
+
+	api.WriteJSON(w, r, task, http.StatusOK)
 }
 
 func (api *API) createTask(w http.ResponseWriter, r *http.Request) {
@@ -78,52 +75,43 @@ func (api *API) createTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	api.mu.Lock()
 	req.UUID = uuid.NewString()
-	api.tasks[req.UUID] = req
-	api.mu.Unlock()
 
+	api.tasks.CreateTask(req)
 	api.WriteJSON(w, r, req, http.StatusCreated)
 }
 
 func (api *API) updateTask(w http.ResponseWriter, r *http.Request) {
 	uuid := chi.URLParam(r, "uuid")
-	var updatedTask types.Task
+	updatedTask := types.Task{UUID: uuid}
 
 	if err := json.NewDecoder(r.Body).Decode(&updatedTask); err != nil {
 		api.WriteError(w, r, "Invalid JSON format", http.StatusBadRequest)
 		return
 	}
 
-	api.mu.Lock()
-	_, exists := api.tasks[uuid]
+	_, err := api.tasks.GetTask(uuid)
 
-	if exists {
-		updatedTask.UUID = uuid
-		api.tasks[uuid] = updatedTask
+	if err != nil {
+		api.WriteError(w, r, "Task not found", http.StatusBadRequest)
+		return
 	}
-	api.mu.Unlock()
 
-	if exists {
-		api.WriteJSON(w, r, updatedTask, http.StatusOK)
-	} else {
-		api.WriteError(w, r, "Task not found", http.StatusNotFound)
+	if err = api.tasks.UpdateTask(updatedTask); err != nil {
+		api.WriteError(w, r, "Invalid JSON format", http.StatusBadRequest)
+		return
 	}
+
+	api.WriteJSON(w, r, updatedTask, http.StatusOK)
 }
 
 func (api *API) destroyTask(w http.ResponseWriter, r *http.Request) {
 	uuid := chi.URLParam(r, "uuid")
 
-	api.mu.Lock()
-	_, exists := api.tasks[uuid]
-	if exists {
-		delete(api.tasks, uuid)
-	}
-	api.mu.Unlock()
-
-	if exists {
-		api.WriteNoContent(w)
-	} else {
+	if err := api.tasks.DestroyTask(uuid); err != nil {
 		api.WriteError(w, r, "Task not found", http.StatusNotFound)
+		return
 	}
+
+	api.WriteJSON(w, r, map[string]string{uuid: uuid}, http.StatusNoContent)
 }
