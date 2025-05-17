@@ -46,7 +46,7 @@ func (api *API) registerEndpoints() {
 }
 
 func (api *API) getTasks(w http.ResponseWriter, r *http.Request) {
-	tasks, err := api.tasks.ObjectsTasks()
+	tasks, err := api.tasks.GetTasks()
 
 	if err != nil {
 		api.WriteError(w, r, "Internal server error", http.StatusInternalServerError)
@@ -58,7 +58,7 @@ func (api *API) getTasks(w http.ResponseWriter, r *http.Request) {
 
 func (api *API) getTask(w http.ResponseWriter, r *http.Request) {
 	uuid := chi.URLParam(r, "uuid")
-	task, err := api.tasks.ObjectTask(uuid)
+	task, err := api.tasks.GetTask(uuid)
 
 	if err != nil {
 		api.WriteError(w, r, "Task not found", http.StatusNotFound)
@@ -90,7 +90,7 @@ func (api *API) updateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := api.tasks.ObjectTask(uuid)
+	_, err := api.tasks.GetTask(uuid)
 
 	if err != nil {
 		api.WriteError(w, r, "Task not found", http.StatusBadRequest)

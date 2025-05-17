@@ -31,7 +31,7 @@ func InitDB() (*DB, error) {
 	return &DB{db: gormDB}, nil
 }
 
-func (db *DB) ObjectsTasks() ([]types.Task, error) {
+func (db *DB) GetTasks() ([]types.Task, error) {
 	tasks := []types.Task{}
 
 	if err := db.db.Find(&tasks).Error; err != nil {
@@ -41,7 +41,7 @@ func (db *DB) ObjectsTasks() ([]types.Task, error) {
 	return tasks, nil
 }
 
-func (db *DB) ObjectTask(objectID string) (types.Task, error) {
+func (db *DB) GetTask(objectID string) (types.Task, error) {
 	task := types.Task{}
 
 	if err := db.db.First(&task, "uuid = ?", objectID).Error; err != nil {

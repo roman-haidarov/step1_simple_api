@@ -15,12 +15,12 @@ func New(db db.DB) *Service {
 	}
 }
 
-func (s *Service) ObjectsTasks() ([]types.Task, error) {
-	return s.db.ObjectsTasks()
+func (s *Service) GetTasks() ([]types.Task, error) {
+	return s.db.GetTasks()
 }
 
-func (s *Service) ObjectTask(objectID string) (types.Task, error) {
-	return s.db.ObjectTask(objectID)
+func (s *Service) GetTask(objectID string) (types.Task, error) {
+	return s.db.GetTask(objectID)
 }
 
 func (s *Service) CreateTask(task types.Task) (types.Task, error) {
