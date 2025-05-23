@@ -1,7 +1,9 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
+	"net"
 	"net/http"
 	"step1_simple_api/internal/tasks"
 	"step1_simple_api/internal/types"
@@ -26,10 +28,11 @@ func New(tasks *tasks.Service) *API {
 	return api
 }
 
-func (api *API) Serve() error {
+func (api *API) Serve(ctx context.Context) error {
 	srv := &http.Server{
 		Addr:         ":8080",
 		Handler:      api.router,
+		BaseContext:  func(_ net.Listener) context.Context { return ctx },
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 5 * time.Second,
 	}
