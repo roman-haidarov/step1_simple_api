@@ -25,11 +25,6 @@ func InitDB() (*DB, error) {
 
 	gormDB = gormDB.Debug()
 
-	if err := gormDB.AutoMigrate(&types.Task{}); err != nil {
-		logrus.Fatalf("Could not migrate, %v", err)
-		return nil, err
-	}
-
 	logrus.Info("Database connection established successfully")
 	return &DB{db: gormDB}, nil
 }
