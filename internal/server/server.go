@@ -1,9 +1,12 @@
 package server
 
 import (
+	"context"
 	"step1_simple_api/internal/api"
 	"step1_simple_api/internal/db"
 	"step1_simple_api/internal/tasks"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
@@ -27,6 +30,10 @@ func New() (*Server, error) {
 	return &s, nil
 }
 
-func (s *Server) Run() error {
-	return s.api.Serve()
+func (s *Server) Run(ctx context.Context) error {
+	return s.api.Serve(ctx)
+}
+
+func (s *Server) Shutdown() {
+	logrus.Info("graceful server shutdown")
 }
