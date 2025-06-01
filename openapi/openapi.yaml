@@ -1,0 +1,208 @@
+openapi: 3.0.3
+info:
+  title: Tasks API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+
+tags:
+  - name: tasks
+    description: Task management operations
+
+paths:
+  /tasks:
+    get:
+      operationId: getTasks
+      summary: Get all tasks
+      tags:
+        - tasks
+      responses:
+        '200':
+          description: A list of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      operationId: createTask
+      summary: Create a new task
+      tags:
+        - tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tasks/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Task UUID
+    
+    get:
+      operationId: getTask
+      summary: Get task by UUID
+      tags:
+        - tasks
+      responses:
+        '200':
+          description: Task found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    patch:
+      operationId: updateTask
+      summary: Update task
+      tags:
+        - tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      operationId: destroyTask
+      summary: Delete task
+      tags:
+        - tasks
+      responses:
+        '204':
+          description: Task deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    Task:
+      type: object
+      required:
+        - uuid
+        - description
+        - is_done
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Unique identifier
+        description:
+          type: string
+          description: Task description
+        is_done:
+          type: boolean
+          description: Task completion status
+        created_at:
+          type: string
+          format: date-time
+          description: Creation time
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update time
+        deleted_at:
+          type: string
+          format: date-time
+          description: Deletion time
+
+    CreateTaskRequest:
+      type: object
+      required:
+        - description
+      properties:
+        description:
+          type: string
+          description: Task description
+        is_done:
+          type: boolean
+          description: Task completion status
+          default: false
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Task description
+        is_done:
+          type: boolean
+          description: Task completion status
+
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
