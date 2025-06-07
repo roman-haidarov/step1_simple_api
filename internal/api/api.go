@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	openapi_types "github.com/oapi-codegen/runtime/types"
+	"github.com/rs/zerolog/log"
 )
 
 type API struct {
@@ -50,7 +51,10 @@ func (api *API) CreateTask(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:   time.Now(),
 	}
 
-	api.tasks.CreateTask(task)
+	if _, err := api.tasks.CreateTask(task); err != nil {
+		api.WriteError(w, r, "Failed to create task", http.StatusBadRequest)
+		return
+	}
 
 	response := api.convertToGeneratedTask(task)
 	api.WriteJSON(w, r, response, http.StatusCreated)
@@ -162,7 +166,10 @@ func (api *API) Serve(ctx context.Context) error {
 func (api *API) WriteJSON(w http.ResponseWriter, r *http.Request, data interface{}, status int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	if err := json.NewEncoder(w).Encode(data); err != nil {}
+
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		log.Debug().Err(err).Msg("Failed to encode error response")
+	}
 }
 
 func (api *API) WriteError(w http.ResponseWriter, r *http.Request, message string, status int) {
@@ -171,5 +178,7 @@ func (api *API) WriteError(w http.ResponseWriter, r *http.Request, message strin
 	errorResponse := generatedTasks.Error{
 		Message: message,
 	}
-	json.NewEncoder(w).Encode(errorResponse)
+	if err := json.NewEncoder(w).Encode(errorResponse); err != nil {
+		log.Debug().Err(err).Msg("Failed to encode error response")
+	}
 }

@@ -15,4 +15,7 @@ migrate-down:
 	$(MIGRATE) down
 
 run:
-	go run cmd/main.go 
+	go run cmd/main.go
+
+lint:
+	golangci-lint run --out-format=colored-line-number

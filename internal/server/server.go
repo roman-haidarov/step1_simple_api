@@ -6,7 +6,7 @@ import (
 	"step1_simple_api/internal/db"
 	"step1_simple_api/internal/tasks"
 
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 type Server struct {
@@ -35,5 +35,5 @@ func (s *Server) Run(ctx context.Context) error {
 }
 
 func (s *Server) Shutdown() {
-	logrus.Info("graceful server shutdown")
+	log.Info().Msg("graceful server shutdown")
 }
