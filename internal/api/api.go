@@ -50,7 +50,10 @@ func (api *API) CreateTask(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:   time.Now(),
 	}
 
-	api.tasks.CreateTask(task)
+	if _, err := api.tasks.CreateTask(task); err != nil {
+		api.WriteError(w, r, "Failed to create task", http.StatusBadRequest)
+		return
+	}
 
 	response := api.convertToGeneratedTask(task)
 	api.WriteJSON(w, r, response, http.StatusCreated)
