@@ -13,7 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	openapi_types "github.com/oapi-codegen/runtime/types"
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 type API struct {
@@ -168,7 +168,7 @@ func (api *API) WriteJSON(w http.ResponseWriter, r *http.Request, data interface
 	w.WriteHeader(status)
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		logrus.WithError(err).Debug("Failed to encode error response")
+		log.Debug().Err(err).Msg("Failed to encode error response")
 	}
 }
 
@@ -178,8 +178,7 @@ func (api *API) WriteError(w http.ResponseWriter, r *http.Request, message strin
 	errorResponse := generatedTasks.Error{
 		Message: message,
 	}
-
 	if err := json.NewEncoder(w).Encode(errorResponse); err != nil {
-		logrus.WithError(err).Debug("Failed to encode error response")
+		log.Debug().Err(err).Msg("Failed to encode error response")
 	}
 }
