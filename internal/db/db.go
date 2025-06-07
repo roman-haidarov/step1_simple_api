@@ -2,7 +2,6 @@ package db
 
 import (
 	"step1_simple_api/internal/types"
-	"sync"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -10,7 +9,6 @@ import (
 )
 
 type DB struct {
-	mu *sync.Mutex
 	db *gorm.DB
 }
 
