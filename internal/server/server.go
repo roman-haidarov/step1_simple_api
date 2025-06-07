@@ -11,7 +11,7 @@ import (
 
 type Server struct {
 	db    db.DB
-	api   *api.API
+	Api   *api.API
 	tasks *tasks.Service
 }
 
@@ -25,13 +25,13 @@ func New() (*Server, error) {
 
 	s.db = *db
 	s.tasks = tasks.New(s.db)
-	s.api = api.New(s.tasks)
+	s.Api = api.New(s.tasks)
 
 	return &s, nil
 }
 
 func (s *Server) Run(ctx context.Context) error {
-	return s.api.Serve(ctx)
+	return s.Api.Serve(ctx)
 }
 
 func (s *Server) Shutdown() {

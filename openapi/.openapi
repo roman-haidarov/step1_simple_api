@@ -1,0 +1,17 @@
+# package: tasks
+# generate:
+#   chi-server: true
+#   types: true
+# include-tags:
+#   - tasks
+# output-options:
+#   skip-fmt: false
+#   skip-prune: false
+package: tasks
+generate:
+  strict-server: true
+  chi-server: true
+  types: true
+include-tags:
+  - tasks
+output: api.gen.go
