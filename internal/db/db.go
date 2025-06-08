@@ -82,3 +82,59 @@ func (db *DB) DestroyTask(objectID string) error {
 	log.Info().Str("count", task.UUID).Msg("Task deleted successfully")
 	return nil
 }
+
+func (db *DB) GetUsers() ([]types.User, error) {
+	users := []types.User{}
+
+	if err := db.db.Find(&users).Error; err != nil {
+		log.Fatal().Err(err).Msg("Failed to fetch users")
+		return users, err
+	}
+
+	log.Info().Int("count", len(users)).Msg("Users fetched successfully")
+	return users, nil
+}
+
+func (db *DB) GetUser(objectID int) (types.User, error) {
+	user := types.User{}
+
+	if err := db.db.First(&user, "id = ?", objectID).Error; err != nil {
+		log.Warn().Err(err).Int("id", objectID).Msg("User not found")
+		return user, err
+	}
+
+	log.Info().Int("count", objectID).Msg("User fetched successfully")
+	return user, nil
+}
+
+func (db *DB) CreateUser(user types.User) (types.User, error) {
+	if err := db.db.Create(&user).Error; err != nil {
+		log.Warn().Err(err).Int("id", user.ID).Msg("Failed to create user")
+		return user, err
+	}
+
+	log.Info().Int("count", user.ID).Msg("User created successfully")
+	return user, nil
+}
+
+func (db *DB) UpdateUser(user types.User) error {
+	if err := db.db.Updates(&user).Error; err != nil {
+		log.Warn().Err(err).Int("id", user.ID).Msg("Failed to update user")
+		return err
+	}
+
+	log.Info().Int("count", user.ID).Msg("User updated successfully")
+	return nil
+}
+
+func (db *DB) DestroyUser(objectID int) error {
+	user := types.User{ID: objectID}
+
+	if err := db.db.Delete(&user).Error; err != nil {
+		log.Warn().Err(err).Int("id", user.ID).Msg("Failed to delete user")
+		return err
+	}
+
+	log.Info().Int("count", user.ID).Msg("User deleted successfully")
+	return nil
+}

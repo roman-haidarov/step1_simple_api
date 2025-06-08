@@ -10,6 +10,8 @@ servers:
 tags:
   - name: tasks
     description: Task management operations
+  - name: users
+    description: User management operations
 
 paths:
   /tasks:
@@ -118,6 +120,111 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /users:
+    get:
+      operationId: getUsers
+      summary: Get all users
+      tags:
+        - users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      operationId: createUser
+      summary: Create a new user
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+    
+    get:
+      operationId: getUser
+      summary: Get user by ID
+      tags:
+        - users
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    patch:
+      operationId: updateUser
+      summary: Update user
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      operationId: destroyUser
+      summary: Delete user
+      tags:
+        - users
+      responses:
+        '204':
+          description: User deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   schemas:
     Task:
@@ -137,6 +244,31 @@ components:
         is_done:
           type: boolean
           description: Task completion status
+        created_at:
+          type: string
+          format: date-time
+          description: Creation time
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update time
+        deleted_at:
+          type: string
+          format: date-time
+          description: Deletion time
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: integer
+          description: Unique identifier
+        email:
+          type: string
+          description: User email
         created_at:
           type: string
           format: date-time
@@ -172,6 +304,26 @@ components:
         is_done:
           type: boolean
           description: Task completion status
+
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: User email
+        password:
+          type: string
+          description: User password
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: User email
 
     Error:
       type: object

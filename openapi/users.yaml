@@ -1,0 +1,8 @@
+package: users
+generate:
+  strict-server: true
+  chi-server: true
+  types: true
+include-tags:
+  - users
+output: api.gen.go
