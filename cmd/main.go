@@ -4,17 +4,20 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"step1_simple_api/internal/logger"
 	"step1_simple_api/internal/server"
 	"syscall"
 
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
+	logger.Init(zerolog.DebugLevel)
 	srv, err := server.New()
 
 	if err != nil {
-		logrus.Error(err)
+		log.Fatal().Err(err).Msg("can not create server")
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill, syscall.SIGTERM)
@@ -22,11 +25,11 @@ func main() {
 
 	go func() {
 		if err := srv.Run(ctx); err != nil {
-			logrus.Error(err)
+			log.Fatal().Err(err).Msg("server error")
 		}
 	}()
 
-	logrus.Info("Server started")
+	log.Info().Msg("Server started")
 
 	<-ctx.Done()
 	srv.Shutdown()
