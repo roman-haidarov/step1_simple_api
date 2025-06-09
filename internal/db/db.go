@@ -27,10 +27,15 @@ func InitDB() (*DB, error) {
 	return &DB{db: gormDB}, nil
 }
 
-func (db *DB) GetTasks() ([]types.Task, error) {
+func (db *DB) GetTasks(userID ...int) ([]types.Task, error) {
 	tasks := []types.Task{}
+	query := db.db
 
-	if err := db.db.Find(&tasks).Error; err != nil {
+	if len(userID) > 0 && userID[0] > 0 {
+		query = query.Where("user_id = ?", userID[0])
+	}
+
+	if err := query.Find(&tasks).Error; err != nil {
 		log.Fatal().Err(err).Msg("Failed to fetch tasks")
 		return tasks, err
 	}

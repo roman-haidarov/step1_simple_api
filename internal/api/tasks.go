@@ -37,6 +37,7 @@ func (api *API) CreateTask(w http.ResponseWriter, r *http.Request) {
 		UUID:        uuid.NewString(),
 		Description: req.Description,
 		IsDone:      req.IsDone != nil && *req.IsDone,
+		UserId:      req.UserId,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -81,6 +82,9 @@ func (api *API) UpdateTask(w http.ResponseWriter, r *http.Request, uuid openapi_
 	if req.IsDone != nil {
 		updatedTask.IsDone = *req.IsDone
 	}
+	if req.UserId != nil {
+		updatedTask.UserId = *req.UserId
+	}
 	updatedTask.UpdatedAt = time.Now()
 
 	if err = api.tasks.UpdateTask(updatedTask); err != nil {
@@ -114,6 +118,7 @@ func (api *API) convertToGeneratedTask(task types.Task) generatedTasks.Task {
 		Uuid:        uuidObj,
 		Description: task.Description,
 		IsDone:      task.IsDone,
+		UserId: 		 task.UserId,
 	}
 
 	if !task.CreatedAt.IsZero() {

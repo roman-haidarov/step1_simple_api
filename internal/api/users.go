@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"step1_simple_api/internal/types"
 	"step1_simple_api/internal/users/password"
+	generatedTasks "step1_simple_api/internal/web/tasks"
 	generatedUsers "step1_simple_api/internal/web/users"
 	"time"
 )
@@ -102,6 +103,21 @@ func (api *API) DestroyUser(w http.ResponseWriter, r *http.Request, id int) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (api *API) GetUserTasks(w http.ResponseWriter, r *http.Request, id int) {
+	tasks, err := api.tasks.GetTasks(id)
+	if err != nil {
+		api.WriteError(w, r, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	response := make([]generatedTasks.Task, len(tasks))
+	for i, task := range tasks {
+		response[i] = api.convertToGeneratedTask(task)
+	}
+
+	api.WriteJSON(w, r, response, http.StatusOK)
 }
 
 func (api *API) convertToGeneratedUser(user types.User) generatedUsers.User {	

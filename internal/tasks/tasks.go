@@ -15,8 +15,8 @@ func New(db db.DB) *Service {
 	}
 }
 
-func (s *Service) GetTasks() ([]types.Task, error) {
-	return s.db.GetTasks()
+func (s *Service) GetTasks(userID ...int) ([]types.Task, error) {
+	return s.db.GetTasks(userID...)
 }
 
 func (s *Service) GetTask(objectID string) (types.Task, error) {
