@@ -1,0 +1,8 @@
+package: tasks
+generate:
+  strict-server: true
+  chi-server: true
+  types: true
+include-tags:
+  - tasks
+output: api.gen.go

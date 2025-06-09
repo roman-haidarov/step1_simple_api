@@ -5,6 +5,7 @@ import (
 	"step1_simple_api/internal/api"
 	"step1_simple_api/internal/db"
 	"step1_simple_api/internal/tasks"
+	"step1_simple_api/internal/users"
 
 	"github.com/rs/zerolog/log"
 )
@@ -13,6 +14,7 @@ type Server struct {
 	db    db.DB
 	Api   *api.API
 	tasks *tasks.Service
+	users *users.Service
 }
 
 func New() (*Server, error) {
@@ -25,7 +27,8 @@ func New() (*Server, error) {
 
 	s.db = *db
 	s.tasks = tasks.New(s.db)
-	s.Api = api.New(s.tasks)
+	s.users = users.New(s.db)
+	s.Api = api.New(s.tasks, s.users)
 
 	return &s, nil
 }
