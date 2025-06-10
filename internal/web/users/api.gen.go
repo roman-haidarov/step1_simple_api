@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // CreateUserRequest defines model for CreateUserRequest.
@@ -28,6 +29,30 @@ type Error struct {
 
 	// Message Error message
 	Message string `json:"message"`
+}
+
+// Task defines model for Task.
+type Task struct {
+	// CreatedAt Creation time
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// DeletedAt Deletion time
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+
+	// Description Task description
+	Description string `json:"description"`
+
+	// IsDone Task completion status
+	IsDone bool `json:"is_done"`
+
+	// UpdatedAt Last update time
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+
+	// UserId User key
+	UserId int `json:"user_id"`
+
+	// Uuid Unique identifier
+	Uuid openapi_types.UUID `json:"uuid"`
 }
 
 // UpdateUserRequest defines model for UpdateUserRequest.
@@ -86,6 +111,9 @@ type ServerInterface interface {
 	// Update user
 	// (PATCH /users/{id})
 	UpdateUser(w http.ResponseWriter, r *http.Request, id int)
+	// Get tasks by user ID
+	// (GET /users/{id}/tasks)
+	GetUserTasks(w http.ResponseWriter, r *http.Request, id int)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -119,6 +147,12 @@ func (_ Unimplemented) GetUser(w http.ResponseWriter, r *http.Request, id int) {
 // Update user
 // (PATCH /users/{id})
 func (_ Unimplemented) UpdateUser(w http.ResponseWriter, r *http.Request, id int) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get tasks by user ID
+// (GET /users/{id}/tasks)
+func (_ Unimplemented) GetUserTasks(w http.ResponseWriter, r *http.Request, id int) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -230,6 +264,32 @@ func (siw *ServerInterfaceWrapper) UpdateUser(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateUser(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetUserTasks operation middleware
+func (siw *ServerInterfaceWrapper) GetUserTasks(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUserTasks(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -366,6 +426,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Patch(options.BaseURL+"/users/{id}", wrapper.UpdateUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/{id}/tasks", wrapper.GetUserTasks)
 	})
 
 	return r

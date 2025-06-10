@@ -225,6 +225,34 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /users/{id}/tasks:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: User ID
+    
+    get:
+      operationId: getUserTasks
+      summary: Get tasks by user ID
+      tags:
+        - users
+      responses:
+        '200':
+          description: Tasks retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   schemas:
     Task:
@@ -233,6 +261,7 @@ components:
         - uuid
         - description
         - is_done
+        - user_id
       properties:
         uuid:
           type: string
@@ -244,6 +273,9 @@ components:
         is_done:
           type: boolean
           description: Task completion status
+        user_id:
+          type: integer
+          description: User key
         created_at:
           type: string
           format: date-time
@@ -286,6 +318,7 @@ components:
       type: object
       required:
         - description
+        - user_id
       properties:
         description:
           type: string
@@ -294,6 +327,9 @@ components:
           type: boolean
           description: Task completion status
           default: false
+        user_id:
+          type: integer
+          description: User key
 
     UpdateTaskRequest:
       type: object
@@ -304,6 +340,9 @@ components:
         is_done:
           type: boolean
           description: Task completion status
+        user_id:
+          type: integer
+          description: User key
 
     CreateUserRequest:
       type: object

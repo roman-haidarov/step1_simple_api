@@ -20,6 +20,9 @@ type CreateTaskRequest struct {
 
 	// IsDone Task completion status
 	IsDone *bool `json:"is_done,omitempty"`
+
+	// UserId User key
+	UserId int `json:"user_id"`
 }
 
 // Error defines model for Error.
@@ -48,6 +51,9 @@ type Task struct {
 	// UpdatedAt Last update time
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 
+	// UserId User key
+	UserId int `json:"user_id"`
+
 	// Uuid Unique identifier
 	Uuid openapi_types.UUID `json:"uuid"`
 }
@@ -59,6 +65,9 @@ type UpdateTaskRequest struct {
 
 	// IsDone Task completion status
 	IsDone *bool `json:"is_done,omitempty"`
+
+	// UserId User key
+	UserId *int `json:"user_id,omitempty"`
 }
 
 // BadRequest defines model for BadRequest.
